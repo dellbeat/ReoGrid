@@ -160,6 +160,7 @@ namespace unvell.ReoGrid
 			InitWorkbook(this.adapter);
 
 			TextCompositionManager.AddPreviewTextInputHandler(this, OnTextInputStart);
+			TextCompositionManager.AddTextInputHandler(this, OnTextInputs);
 
 			this.EndInit();
 
@@ -546,10 +547,16 @@ namespace unvell.ReoGrid
 			}
 		}
 
-		#endregion // Keyboard
+		private void OnTextInputs(object sender, TextCompositionEventArgs e)
+		{
+			currentWorksheet.SetCellData(currentWorksheet.selectionRange.Row, currentWorksheet.selectionRange.Col, e.Text);
+			currentWorksheet.CellEditText = e.Text;
+		}
 
-		#region Adapter
-		private class ReoGridWPFControlAdapter : IControlAdapter
+        #endregion // Keyboard
+
+        #region Adapter
+        private class ReoGridWPFControlAdapter : IControlAdapter
 		{
 			#region Constructor
 			private readonly ReoGridControl canvas;
@@ -1052,6 +1059,10 @@ namespace unvell.ReoGrid
 			{
 				base.OnTextChanged(e);
 				this.Text = this.Owner.currentWorksheet.RaiseCellEditTextChanging(this.Text);
+				if (e.Changes.Count > 0)
+				{
+					Select(Text.Length, 0);
+				}
 			}
 			protected override void OnPreviewTextInput(TextCompositionEventArgs e)
 			{
